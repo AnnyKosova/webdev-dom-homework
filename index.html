@@ -8,7 +8,7 @@
 
   <body>
     <div class="container">
-      <ul class="comments">
+      <ul class="comments" id="list">
         <li class="comment">
           <div class="comment-header">
             <div>Глеб Фокин</div>
@@ -46,18 +46,18 @@
       </ul>
       <div class="add-form">
         <input
-          type="text"
+          type="text" id="name"
           class="add-form-name"
           placeholder="Введите ваше имя"
         />
         <textarea
-          type="textarea"
+          type="textarea" id="comment"
           class="add-form-text"
           placeholder="Введите ваш коментарий"
           rows="4"
         ></textarea>
         <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
+          <button class="add-form-button" id="add">Написать</button>
         </div>
       </div>
     </div>
@@ -65,7 +65,52 @@
 
   <script>
     "use strict";
-    // Код писать здесь
-    console.log("It works!");
+    
+    const buttonWrite = document.getElementById('add');
+    buttonWrite.addEventListener('click', () => {
+  if (!inputName.value.trim() || !inputComment.value.trim()) {
+    alert("Заполните имя и комментарий!");
+    return;
+  }
+
+  const newComment = `
+    <li class="comment">
+      <div class="comment-header">
+        <div>${inputName.value}</div>
+        <div>${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString().slice(0, 5)}</div>
+      </div>
+      <div class="comment-body">
+        <div class="comment-text">${inputComment.value}</div>
+      </div>
+      <div class="comment-footer">
+        <div class="likes">
+          <span class="likes-counter">0</span>
+          <button class="like-button"></button>
+        </div>
+      </div>
+    </li>
+  `;
+
+  list.innerHTML += newComment;
+
+  inputName.value = '';
+  inputComment.value = '';
+});
+
+    const  inputName = document.getElementById('name');
+    inputName.addEventListener('input', (event) => {
+      console.log(event.target.value);
+    });
+
+    const  inputComment = document.getElementById('comment');
+    inputComment.addEventListener('input', (event) => {
+      console.log(event.target.value);
+    });
+
+    const list = document.getElementById('list');
+
+
+
+    //console.log("It works!");
   </script>
 </html>
