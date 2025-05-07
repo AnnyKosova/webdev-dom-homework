@@ -82,16 +82,25 @@
   }
 ];
 
+function escapeHtml(unsafe) {
+  return unsafe
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
 function renderComments() {
   const list = document.getElementById('list');
   list.innerHTML = comments.map((comment, index) => `
     <li class="comment" data-index="${index}">
       <div class="comment-header">
-        <div>${comment.name}</div>
+        <div>${escapeHtml(comment.name)}</div>
         <div>${comment.date}</div>
       </div>
       <div class="comment-body">
-        <div class="comment-text">${comment.text}</div>
+        <div class="comment-text">${escapeHtml(comment.text)}</div>
       </div>
       <div class="comment-footer">
         <div class="likes">
@@ -103,15 +112,30 @@ function renderComments() {
   `).join('');
 }
 
+document.getElementById('list').addEventListener('click', (e) => {
+  if (!e.target.classList.contains('like-button')) {
+    const commentElement = e.target.closest('.comment');
+    if (commentElement) {
+      const index = commentElement.dataset.index;
+      const comment = comments[index];
+          
+      const commentInput = document.getElementById('comment');
+      commentInput.value = `> ${comment.name}: ${comment.text}\n`;
+      commentInput.focus();
+    }
+  }
+});
 
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('like-button')) {
+    e.stopPropagation();
+        
     const commentElement = e.target.closest('.comment');
     const index = commentElement.dataset.index;
-    
+        
     comments[index].isLiked = !comments[index].isLiked;
     comments[index].likes += comments[index].isLiked ? 1 : -1;
-    
+        
     renderComments();
   }
 });
@@ -120,26 +144,29 @@ const buttonWrite = document.getElementById('add');
 buttonWrite.addEventListener('click', () => {
   const nameInput = document.getElementById('name');
   const commentInput = document.getElementById('comment');
-  
+      
   if (!nameInput.value.trim() || !commentInput.value.trim()) {
     alert("Заполните имя и комментарий!");
     return;
   }
 
+  const safeName = escapeHtml(nameInput.value.trim());
+  const safeComment = escapeHtml(commentInput.value.trim());
+
   comments.push({
-    name: nameInput.value,
+    name: safeName,
     date: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString().slice(0,5)}`,
-    text: commentInput.value,
+    text: safeComment,
     likes: 0,
     isLiked: false
   });
 
   renderComments();
-  
+      
   nameInput.value = '';
   commentInput.value = '';
 });
- 
+     
 renderComments();
 
   </script>
