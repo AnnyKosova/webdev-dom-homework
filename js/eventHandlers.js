@@ -2,62 +2,76 @@ import { comments } from './comments.js';
 import { renderComments } from './render.js';
 import { escapeHtml } from './escapeHtml.js';
 
+const commentHandlers = new WeakMap();
+
 export function initEventHandlers() {
-  document.getElementById('list').addEventListener('click', handleCommentClick);
-  document.addEventListener('click', handleLikeClick);
   document.getElementById('add').addEventListener('click', handleAddComment);
 }
 
-function handleCommentClick(e) {
-  if (!e.target.classList.contains('like-button')) {
-    const commentElement = e.target.closest('.comment');
-    if (commentElement) {
-      const index = commentElement.dataset.index;
-      const comment = comments[index];
-          
-      const commentInput = document.getElementById('comment');
-      commentInput.value = `> ${comment.name}: ${comment.text}\n`;
-      commentInput.focus();
-    }
+export function setupCommentHandlers() {
+  document.querySelectorAll('.comment').forEach(comment => {
+    if (commentHandlers.has(comment)) return;
+
+    const likeButton = comment.querySelector('.like-button');
+    
+    const likeHandler = (e) => {
+      e.stopPropagation();
+      const index = comment.dataset.index;
+      comments[index].isLiked = !comments[index].isLiked;
+      comments[index].likes += comments[index].isLiked ? 1 : -1;
+      
+      updateCommentInDOM(index);
+    };
+    
+    const commentHandler = (e) => {
+      if (e.target.classList.contains('like-button')) return;
+      const index = comment.dataset.index;
+      quoteComment(index);
+    };
+
+    likeButton.addEventListener('click', likeHandler);
+    comment.addEventListener('click', commentHandler);
+    
+    commentHandlers.set(comment, { likeHandler, commentHandler });
+  });
+}
+
+function updateCommentInDOM(index) {
+  const comment = comments[index];
+  const commentElement = document.querySelector(`.comment[data-index="${index}"]`);
+  
+  if (commentElement) {
+    commentElement.querySelector('.likes-counter').textContent = comment.likes;
+    commentElement.querySelector('.like-button').className = 
+      `like-button ${comment.isLiked ? '-active-like' : ''}`;
   }
 }
 
-function handleLikeClick(e) {
-  if (e.target.classList.contains('like-button')) {
-    e.stopPropagation();
-        
-    const commentElement = e.target.closest('.comment');
-    const index = commentElement.dataset.index;
-        
-    comments[index].isLiked = !comments[index].isLiked;
-    comments[index].likes += comments[index].isLiked ? 1 : -1;
-        
-    renderComments(comments);
-  }
+function quoteComment(index) {
+  const comment = comments[index];
+  const commentInput = document.getElementById('comment');
+  commentInput.value = `> ${comment.name}: ${comment.text}\n`;
+  commentInput.focus();
 }
 
 function handleAddComment() {
   const nameInput = document.getElementById('name');
   const commentInput = document.getElementById('comment');
-      
+  
   if (!nameInput.value.trim() || !commentInput.value.trim()) {
-    alert("Заполните имя и комментарий!");
+    alert('Заполните имя и комментарий!');
     return;
   }
 
-  const safeName = escapeHtml(nameInput.value.trim());
-  const safeComment = escapeHtml(commentInput.value.trim());
-
   comments.push({
-    name: safeName,
+    name: escapeHtml(nameInput.value.trim()),
     date: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString().slice(0,5)}`,
-    text: safeComment,
+    text: escapeHtml(commentInput.value.trim()),
     likes: 0,
     isLiked: false
   });
 
   renderComments(comments);
-      
   nameInput.value = '';
   commentInput.value = '';
 }
