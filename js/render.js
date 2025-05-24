@@ -1,37 +1,13 @@
+import { comments } from './comments.js';
 import { escapeHtml } from './escapeHtml.js';
-import { setupCommentHandlers } from './eventHandlers.js';
+import { setupLikeHandlers, setupQuoteHandlers } from './eventHandlers.js';
 
-const listElement = document.getElementById('list');
-const commentTemplate = document.createElement('template');
+export function renderComments() {
+  const list = document.getElementById('list');
 
-export function renderComments(comments) {
-  const scrollPosition = listElement.scrollTop;
-  
-  if (shouldFullRender(comments)) {
-    listElement.innerHTML = '';
-    comments.forEach((comment, index) => {
-      listElement.appendChild(createCommentElement(comment, index));
-    });
-  } else {
-    comments.forEach((comment, index) => {
-      updateExistingComment(comment, index);
-    });
-  }
-  
-  listElement.scrollTop = scrollPosition;
-  
-  setupCommentHandlers();
-}
-
-function shouldFullRender(comments) {
-  return listElement.children.length !== comments.length ||
-         Array.from(listElement.children).some((el, i) => 
-           el.dataset.index !== i.toString()
-         );
-}
-
-function createCommentElement(comment, index) {
-  commentTemplate.innerHTML = `
+  const htmlComments = comments
+    .map(
+      (comment, index) => `
     <li class="comment" data-index="${index}">
       <div class="comment-header">
         <div>${escapeHtml(comment.name)}</div>
@@ -47,23 +23,12 @@ function createCommentElement(comment, index) {
         </div>
       </div>
     </li>
-  `;
-  return commentTemplate.content.firstElementChild.cloneNode(true);
-}
+  `
+    )
+    .join('');
 
-function updateExistingComment(comment, index) {
-  const existingElement = listElement.querySelector(`[data-index="${index}"]`);
-  if (existingElement) {
-    const likesCounter = existingElement.querySelector('.likes-counter');
-    const likeButton = existingElement.querySelector('.like-button');
-    
-    if (likesCounter.textContent !== comment.likes.toString()) {
-      likesCounter.textContent = comment.likes;
-    }
-    
-    const newButtonClass = `like-button ${comment.isLiked ? '-active-like' : ''}`;
-    if (likeButton.className !== newButtonClass) {
-      likeButton.className = newButtonClass;
-    }
-  }
+  list.innerHTML = htmlComments;
+
+  setupLikeHandlers();
+  setupQuoteHandlers();
 }

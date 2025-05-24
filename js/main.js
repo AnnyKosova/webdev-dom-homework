@@ -1,10 +1,5 @@
-import { comments } from './comments.js';
 import { renderComments } from './render.js';
-import { initEventHandlers } from './eventHandlers.js';
+import { setupNewCommentHandler } from './eventHandlers.js';
 
-function initApp() {
-  renderComments(comments); 
-  initEventHandlers(); 
-}
-
-initApp();
+renderComments();
+setupNewCommentHandler();
