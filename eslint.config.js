@@ -1,26 +1,10 @@
 import js from '@eslint/js';
 import globals from 'globals';
-import prettierPlugin from 'eslint-plugin-prettier';
+import prettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default [
   js.configs.recommended,
-  {
-    plugins: {
-      prettier: prettierPlugin,
-    },
-    rules: {
-      'prettier/prettier': [
-        'error',
-        {
-          semi: true,
-          singleQuote: true,
-          tabWidth: 2,
-          trailingComma: 'es5',
-          printWidth: 80,
-        },
-      ],
-    },
-  },
+  prettierRecommended,
   {
     files: ['js/**/*.js'],
     languageOptions: {

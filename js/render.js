@@ -1,5 +1,4 @@
 import { comments } from './comments.js';
-import { escapeHtml } from './escapeHtml.js';
 import { setupLikeHandlers, setupQuoteHandlers } from './eventHandlers.js';
 
 export function renderComments() {
@@ -10,11 +9,11 @@ export function renderComments() {
       (comment, index) => `
     <li class="comment" data-index="${index}">
       <div class="comment-header">
-        <div>${escapeHtml(comment.name)}</div>
+        <div>${comment.name}</div>
         <div>${comment.date}</div>
       </div>
       <div class="comment-body">
-        <div class="comment-text">${escapeHtml(comment.text)}</div>
+        <div class="comment-text">${comment.text}</div>
       </div>
       <div class="comment-footer">
         <div class="likes">
@@ -23,12 +22,11 @@ export function renderComments() {
         </div>
       </div>
     </li>
-  `
+      `
     )
     .join('');
 
   list.innerHTML = htmlComments;
-
   setupLikeHandlers();
   setupQuoteHandlers();
 }
