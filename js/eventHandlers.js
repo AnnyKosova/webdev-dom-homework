@@ -1,32 +1,31 @@
-import { comments } from './comments.js';
 import { renderComments } from './render.js';
-import { escapeHtml } from './escapeHtml.js';
+import { postComment, getComments } from './api.js';
 
-export function setupLikeHandlers() {
+export function setupLikeHandlers(comments) {
   document.querySelectorAll('.like-button').forEach((button) => {
     button.addEventListener('click', (e) => {
       const index = e.target.closest('.comment').dataset.index;
       comments[index].isLiked = !comments[index].isLiked;
       comments[index].likes += comments[index].isLiked ? 1 : -1;
-      renderComments();
+      renderComments(comments);
     });
   });
 }
 
-export function setupQuoteHandlers() {
+export function setupQuoteHandlers(comments) {
   document.querySelectorAll('.comment').forEach((comment) => {
     comment.addEventListener('click', (e) => {
       if (!e.target.classList.contains('like-button')) {
         const index = comment.dataset.index;
         document.getElementById('comment').value =
-          `> ${comments[index].name}: ${comments[index].text}\n`;
+          `> ${comments[index].author.name}: ${comments[index].text}\n`;
       }
     });
   });
 }
 
-export function setupNewCommentHandler() {
-  document.getElementById('add').addEventListener('click', () => {
+export async function setupNewCommentHandler() {
+  document.getElementById('add').addEventListener('click', async () => {
     const nameInput = document.getElementById('name');
     const commentInput = document.getElementById('comment');
 
@@ -35,16 +34,19 @@ export function setupNewCommentHandler() {
       return;
     }
 
-    comments.push({
-      name: escapeHtml(nameInput.value.trim()),
-      date: new Date().toLocaleString().slice(0, 17),
-      text: escapeHtml(commentInput.value.trim()),
-      likes: 0,
-      isLiked: false,
-    });
+    try {
+      await postComment({
+        name: nameInput.value.trim(),
+        text: commentInput.value.trim(),
+      });
 
-    renderComments();
-    nameInput.value = '';
-    commentInput.value = '';
+      const updatedComments = await getComments();
+      renderComments(updatedComments);
+
+      nameInput.value = '';
+      commentInput.value = '';
+    } catch (error) {
+      alert(error.message);
+    }
   });
 }
