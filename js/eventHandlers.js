@@ -26,6 +26,7 @@ export function setupQuoteHandlers(comments) {
 
 export async function setupNewCommentHandler() {
   document.getElementById('add').addEventListener('click', async () => {
+    const form = document.querySelector('.add-form');
     const nameInput = document.getElementById('name');
     const commentInput = document.getElementById('comment');
 
@@ -35,6 +36,12 @@ export async function setupNewCommentHandler() {
     }
 
     try {
+      const loadingMessage = document.createElement('div');
+      loadingMessage.className = 'loading-message';
+      loadingMessage.textContent = 'Комментарий добавляется...';
+      form.parentNode.insertBefore(loadingMessage, form);
+      form.style.display = 'none';
+
       await postComment({
         name: nameInput.value.trim(),
         text: commentInput.value.trim(),
@@ -47,6 +54,12 @@ export async function setupNewCommentHandler() {
       commentInput.value = '';
     } catch (error) {
       alert(error.message);
+    } finally {
+      const loadingMessage = document.querySelector('.loading-message');
+      if (loadingMessage) {
+        loadingMessage.remove();
+      }
+      form.style.display = 'flex';
     }
   });
 }
