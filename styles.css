@@ -143,3 +143,17 @@ body {
   color: #ffffff;
   width: 100%;
 }
+.loader button {
+  margin: 10px auto;
+  display: block;
+  background-color: #bcec30;
+  border: none;
+  border-radius: 18px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.loader button:hover {
+  opacity: 0.9;
+}

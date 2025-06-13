@@ -29,11 +29,8 @@ export async function setupNewCommentHandler() {
     const form = document.querySelector('.add-form');
     const nameInput = document.getElementById('name');
     const commentInput = document.getElementById('comment');
-
-    if (!nameInput.value.trim() || !commentInput.value.trim()) {
-      alert('Заполните имя и комментарий!');
-      return;
-    }
+    const name = nameInput.value.trim();
+    const text = commentInput.value.trim();
 
     try {
       const loadingMessage = document.createElement('div');
@@ -42,10 +39,7 @@ export async function setupNewCommentHandler() {
       form.parentNode.insertBefore(loadingMessage, form);
       form.style.display = 'none';
 
-      await postComment({
-        name: nameInput.value.trim(),
-        text: commentInput.value.trim(),
-      });
+      await postComment({ name, text });
 
       const updatedComments = await getComments();
       renderComments(updatedComments);
@@ -53,7 +47,11 @@ export async function setupNewCommentHandler() {
       nameInput.value = '';
       commentInput.value = '';
     } catch (error) {
-      alert(error.message);
+      if (error.message === 'length_error') {
+        alert('Имя и комментарий должны быть не короче 3 символов');
+      } else {
+        alert(error.message);
+      }
     } finally {
       const loadingMessage = document.querySelector('.loading-message');
       if (loadingMessage) {

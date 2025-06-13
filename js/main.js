@@ -11,7 +11,19 @@ async function loadAndRenderComments() {
     renderComments(comments);
   } catch (error) {
     console.error('Ошибка:', error);
-    showLoader('list', 'Не удалось загрузить комментарии');
+    showLoader('list', error.message);
+
+    const retryButton = document.createElement('button');
+    retryButton.textContent = 'Попробовать снова';
+    retryButton.className = 'add-form-button';
+    retryButton.style.marginTop = '10px';
+    retryButton.addEventListener('click', loadAndRenderComments);
+
+    const loader = document.querySelector('.loader');
+    if (loader) {
+      loader.appendChild(document.createElement('br'));
+      loader.appendChild(retryButton);
+    }
   }
 }
 
