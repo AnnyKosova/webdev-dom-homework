@@ -2,9 +2,11 @@ export const BASE_URL = 'https://wedev-api.sky.pro/api/v1/anny-kosova/comments';
 
 export async function getComments() {
   try {
-    console.log('Запрашиваю комментарии...');
     const response = await fetch(BASE_URL);
-    console.log('Ответ сервера:');
+
+    if (response.status === 500) {
+      throw new Error('Сервер сломался, попробуй позже');
+    }
 
     if (!response.ok) {
       throw new Error('Ошибка при загрузке комментариев');
@@ -16,26 +18,45 @@ export async function getComments() {
       isLiked: comment.isLiked || false,
     }));
   } catch (error) {
-    console.error('Ошибка:', error);
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Кажется у вас сломался интернет, попробуйте позже');
+    }
     throw error;
   }
 }
 
 export async function postComment({ name, text }) {
   try {
+    if (name.length < 3 || text.length < 3) {
+      throw new Error('length_error');
+    }
+
     const response = await fetch(BASE_URL, {
       method: 'POST',
-      body: JSON.stringify({ name, text }),
+      body: JSON.stringify({
+        name,
+        text,
+        forceError: true,
+      }),
     });
 
+    if (response.status === 400) {
+      throw new Error('Имя и комментарий должны быть не короче 3 символов');
+    }
+
+    if (response.status === 500) {
+      throw new Error('Сервер сломался, попробуй позже');
+    }
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Ошибка при отправке комментария');
+      throw new Error('Ошибка при отправке комментария');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Ошибка:', error);
+    if (error.message === 'Failed to fetch') {
+      throw new Error('Кажется, у вас сломался интернет, попробуйте позже');
+    }
     throw error;
   }
 }
