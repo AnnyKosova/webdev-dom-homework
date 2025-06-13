@@ -2,7 +2,9 @@ export const BASE_URL = 'https://wedev-api.sky.pro/api/v1/anny-kosova/comments';
 
 export async function getComments() {
   try {
+    console.log('Запрашиваю комментарии...');
     const response = await fetch(BASE_URL);
+    console.log('Ответ сервера:');
 
     if (!response.ok) {
       throw new Error('Ошибка при загрузке комментариев');
@@ -23,7 +25,7 @@ export async function postComment({ name, text }) {
   try {
     const response = await fetch(BASE_URL, {
       method: 'POST',
-      body: JSON.stringify({ text, name }),
+      body: JSON.stringify({ name, text }),
     });
 
     if (!response.ok) {
