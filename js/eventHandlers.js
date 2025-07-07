@@ -27,9 +27,7 @@ export function setupQuoteHandlers(comments) {
 export async function setupNewCommentHandler() {
   document.getElementById('add').addEventListener('click', async () => {
     const form = document.querySelector('.add-form');
-    const nameInput = document.getElementById('name');
     const commentInput = document.getElementById('comment');
-    const name = nameInput.value.trim();
     const text = commentInput.value.trim();
 
     try {
@@ -39,19 +37,14 @@ export async function setupNewCommentHandler() {
       form.parentNode.insertBefore(loadingMessage, form);
       form.style.display = 'none';
 
-      await postComment({ name, text });
+      await postComment({ text });
 
       const updatedComments = await getComments();
       renderComments(updatedComments);
 
-      nameInput.value = '';
       commentInput.value = '';
     } catch (error) {
-      if (error.message === 'length_error') {
-        alert('Имя и комментарий должны быть не короче 3 символов');
-      } else {
-        alert(error.message);
-      }
+      alert(error.message);
     } finally {
       const loadingMessage = document.querySelector('.loading-message');
       if (loadingMessage) {
